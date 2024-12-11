@@ -1,0 +1,82 @@
+services:
+  jenkins:
+    build:
+      context: ./jenkins/      # Ruta donde está tu carpeta de Jenkins que contiene el Dockerfile
+      dockerfile: Dockerfile   # Nombre del Dockerfile, puedes omitir esta línea si se llama "Dockerfile"
+    image: jenkins_master      # Nombre de la imagen construida
+    restart: always
+    ports:
+      - "8080:8080"            # Puerto de Jenkins
+      - "50000:50000"          # Puerto de Jenkins para agentes remotos
+    volumes:
+      - jenkins_data:/var/jenkins_home  # Volumen persistente para los datos de Jenkins
+      - /var/run/docker.sock:/var/run/docker.sock  # Monta el socket de Docker del host
+    environment:
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false  # Deshabilitar el asistente de configuración
+      - JENKINS_USER=admin      # Nombre de usuario predeterminado
+      - JENKINS_PASS=admin      # Contraseña predeterminada
+    networks:
+      - back-tier              # Red personalizada, puedes cambiarla si es necesario
+
+  ssh-agent:
+    image: jenkins/ssh-agent  # Imagen oficial para el agente SSH de Jenkins
+    restart: always
+    networks:
+      - back-tier
+
+  prometheus:
+    image: prom/prometheus:latest  # Última versión de Prometheus
+    restart: always
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"             # Puerto para acceder a Prometheus
+    networks:
+      - back-tier
+
+  grafana:
+    image: grafana/grafana:latest  # Última versión de Grafana
+    restart: always
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"             # Puerto para acceder a Grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    env_file:
+      - ./grafana/config.monitoring
+    networks:
+      - back-tier
+
+  node-exporter:
+    image: prom/node-exporter:latest  # Última versión de Node Exporter
+    restart: always
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points'
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+    expose:
+      - "9100"  # Puerto para acceder al Node Exporter
+    networks:
+      - back-tier
+
+volumes:
+  prometheus_data: {}
+  grafana_data: {}
+  jenkins_data: {}
+
+networks:
+  back-tier:
+    driver: bridge
