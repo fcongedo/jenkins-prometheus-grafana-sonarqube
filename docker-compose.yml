@@ -1,8 +1,8 @@
-version: '3.8'
-
 services:
   jenkins:
-    image: jenkins/jenkins:lts
+    build:
+      context: .
+      dockerfile: Dockerfile  # Utiliza el Dockerfile que creaste para instalar sudo
     ports:
       - "8080:8080"
     volumes:
