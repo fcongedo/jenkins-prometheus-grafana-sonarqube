@@ -15,11 +15,6 @@ Vagrant.configure("2") do |config|
       vb.cpus = 4
     end
 
-    # Configuración del tamaño del disco a 20 GB
-    desafio.vm.provider "virtualbox" do |vb|
-      vb.customize ["modifyvm", :id, "--disk", "size=20000"]
-    end
-
     # Ejecutar el script de bootstrap para instalar aplicaciones
     desafio.vm.provision "shell", path: "bootstrap.sh"
   end
