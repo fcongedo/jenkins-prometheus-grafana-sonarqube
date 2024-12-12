@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   jenkins:
     image: jenkins/jenkins:lts
@@ -79,6 +81,9 @@ services:
       - sonarqube_extensions:/opt/sonarqube/extensions
       - sonarqube_logs:/opt/sonarqube/logs
       - sonarqube_temp:/opt/sonarqube/
+    networks:
+      - back-tier
+    restart: always
 
   sonar_db:
     image: postgres:latest
@@ -90,6 +95,7 @@ services:
       - sonar_db_data:/var/lib/postgresql/data
     networks:
       - back-tier
+    restart: always
 
 volumes:
   prometheus_data: {}
@@ -104,3 +110,4 @@ volumes:
 
 networks:
   back-tier:
+    driver: bridge
