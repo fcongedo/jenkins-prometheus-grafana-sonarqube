@@ -1,26 +1,26 @@
 Vagrant.configure("2") do |config|
   config.vm.define "prueba-jenkins" do |desafio|
     desafio.vm.box = "ubuntu/focal64"
+
+    # Habilitar el reenvío de puerto
+    desafio.vm.network "forwarded_port", guest: 8080, host: 8080  # Jenkins
+    desafio.vm.network "forwarded_port", guest: 9090, host: 9090  # Prometheus
+    desafio.vm.network "forwarded_port", guest: 3000, host: 3000  # Grafana
+    desafio.vm.network "forwarded_port", guest: 9000, host: 9001  # SonarQube
+
+    # Configuración del proveedor VirtualBox
+    desafio.vm.provider "virtualbox" do |vb|
+      vb.name = "prueba-jenkins"
+      vb.memory = "6144"
+      vb.cpus = 4
+    end
+
+    # Configuración del tamaño del disco a 20 GB
+    desafio.vm.provider "virtualbox" do |vb|
+      vb.customize ["modifyvm", :id, "--disk", "size=20000"]
+    end
+
+    # Ejecutar el script de bootstrap para instalar aplicaciones
+    desafio.vm.provision "shell", path: "bootstrap.sh"
   end
-
-  # Habilitar el reenvío de puerto
-  config.vm.network "forwarded_port", guest: 8080, host: 8080  # Jenkins
-  config.vm.network "forwarded_port", guest: 9090, host: 9090  # Prometheus
-  config.vm.network "forwarded_port", guest: 3000, host: 3000  # Grafana
-  config.vm.network "forwarded_port", guest: 9000, host: 9001  # SonarQube
-
-
-  # Configuración del proveedor VirtualBox
-  config.vm.provider "virtualbox" do |vb|
-    vb.name = "prueba-jenkins"
-    vb.memory = "6144"
-    vb.cpus = 4
-  end
-
-  # Configuración del tamaño del disco a 20 GB
-  vb.customize ["modifyvm", :id, "--disk", "size=20000"]
-end
-
-  # Ejecutar el script de bootstrap para instalar aplicaciones
-  config.vm.provision "shell", path: "bootstrap.sh"
 end
