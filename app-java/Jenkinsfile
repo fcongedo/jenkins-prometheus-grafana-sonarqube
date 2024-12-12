@@ -53,6 +53,7 @@ pipeline {
                 dir('jenkins-prometheus-grafana/app-java/pom.xml') {
                 sh 'mvn clean install'
             }
+          }
         }
 
         stage('Ejecutar pruebas unitarias') {
