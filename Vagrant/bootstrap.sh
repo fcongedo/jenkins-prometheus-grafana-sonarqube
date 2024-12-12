@@ -28,3 +28,6 @@ docker compose version
 sudo groupadd docker
 sudo usermod -aG docker vagrant
 newgrp docker
+
+# clonar repositorio github
+git clone https://github.com/fcongedo/prueba
