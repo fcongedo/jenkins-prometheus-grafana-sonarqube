@@ -1,3 +1,4 @@
+version: '3.9'
 services:
   jenkins:
     image: jenkins/jenkins:lts
@@ -16,7 +17,7 @@ services:
       - back-tier
 
   prometheus:
-    image: prom/prometheus:latest  # Se usa la última versión disponible de Prometheus
+    image: prom/prometheus:latest
     restart: always
     volumes:
       - ./prometheus/:/etc/prometheus/
@@ -32,7 +33,7 @@ services:
       - back-tier
 
   grafana:
-    image: grafana/grafana:latest  # Se usa la última versión disponible de Grafana
+    image: grafana/grafana:latest
     restart: always
     depends_on:
       - prometheus
@@ -47,7 +48,7 @@ services:
       - back-tier
 
   node-exporter:
-    image: prom/node-exporter:latest  # Se usa la última versión disponible de Node Exporter
+    image: prom/node-exporter:latest
     restart: always
     volumes:
       - /proc:/host/proc:ro
@@ -63,15 +64,7 @@ services:
     networks:
       - back-tier
 
-volumes:
-  prometheus_data: {}
-  grafana_data: {}
-  jenkins_home: {}
-
-networks:
-  back-tier:
-
-sonarqube:
+  sonarqube:
     image: sonarqube:lts-community
     depends_on:
       - sonar_db
@@ -87,5 +80,28 @@ sonarqube:
       - sonarqube_extensions:/opt/sonarqube/extensions
       - sonarqube_logs:/opt/sonarqube/logs
       - sonarqube_temp:/opt/sonarqube/
-sonar_db:
-  sonar_db_data:
+
+  sonar_db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+      POSTGRES_DB: sonar
+    volumes:
+      - sonar_db_data:/var/lib/postgresql/data
+    networks:
+      - back-tier
+
+volumes:
+  prometheus_data: {}
+  grafana_data: {}
+  jenkins_home: {}
+  sonarqube_conf: {}
+  sonarqube_data: {}
+  sonarqube_extensions: {}
+  sonarqube_logs: {}
+  sonarqube_temp: {}
+  sonar_db_data: {}
+
+networks:
+  back-tier:
