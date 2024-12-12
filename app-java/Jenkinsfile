@@ -58,9 +58,11 @@ pipeline {
 
         stage('Ejecutar pruebas unitarias') {
             steps {
+                dir('/var/jenkins_home/workspace/prueba/app-java') {
                 sh 'mvn test'
                 junit '**/target/surefire-reports/*.xml'
             }
+          }
         }
 
         stage('Build & Run Docker') {
