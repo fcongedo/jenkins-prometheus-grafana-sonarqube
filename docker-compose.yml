@@ -1,7 +1,7 @@
 services:
   jenkins:
     build:
-      context: .
+      context: ./jenkins/
       dockerfile: Dockerfile  # Utiliza el Dockerfile que creaste para instalar sudo
     ports:
       - "8080:8080"
