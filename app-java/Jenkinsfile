@@ -50,7 +50,7 @@ pipeline {
 
         stage('Instalar dependencias') {
             steps {
-                dir('/var/jenkins_home/workspace/prueba/app-java') {
+                dir('/var/jenkins_home/workspace/prueba/app-java/') {
                 sh 'mvn clean install'
             }
           }
@@ -58,7 +58,7 @@ pipeline {
 
         stage('Ejecutar pruebas unitarias') {
             steps {
-                dir('/var/jenkins_home/workspace/prueba/app-java') {
+                dir('/var/jenkins_home/workspace/prueba/app-java/') {
                 sh 'mvn test'
                 junit '**/target/surefire-reports/*.xml'
             }
