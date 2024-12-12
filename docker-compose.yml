@@ -79,6 +79,8 @@ services:
       - sonarqube_extensions:/opt/sonarqube/extensions
       - sonarqube_logs:/opt/sonarqube/logs
       - sonarqube_temp:/opt/sonarqube/
+    sysctls:
+      vm.max_map_count: 262144
 
   sonar_db:
     image: postgres:latest
