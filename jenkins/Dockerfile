@@ -7,8 +7,8 @@ FROM jenkins/jenkins:lts
 #ENV JENKINS_PASS=admin
 
 # Copiar lista de plugins y proceder con la instalación usando jenkins-plugin-cli
-COPY plugins.txt /usr/share/jenkins/plugins.txt
-RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/plugins.txt
+#COPY plugins.txt /usr/share/jenkins/plugins.txt
+#RUN jenkins-plugin-cli --plugin-file /usr/share/jenkins/plugins.txt
 
 # Cambiar al usuario root para poder instalar dependencias necesarias
 USER root

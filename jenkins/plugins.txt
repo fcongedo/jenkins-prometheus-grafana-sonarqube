@@ -5,7 +5,6 @@ branch-api
 cloudbees-folder
 credentials
 cvs
-docker
 durable-task
 external-monitor-job
 git-client
@@ -32,7 +31,6 @@ ssh-slaves
 subversion
 translation
 variant
-windows-slaves
 workflow-aggregator
 workflow-api
 workflow-basic-steps
@@ -50,4 +48,3 @@ pipeline-stage-step
 blueocean
 blueocean-autofavorite
 gitlab-plugin
-prometheus
