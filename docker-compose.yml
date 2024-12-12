@@ -1,31 +1,22 @@
 services:
   jenkins:
-    build:
-      context: ./jenkins/      # Ruta donde está tu carpeta de Jenkins que contiene el Dockerfile
-      dockerfile: Dockerfile   # Nombre del Dockerfile, puedes omitir esta línea si se llama "Dockerfile"
-    image: jenkins_master      # Nombre de la imagen construida
-    restart: always
+    image: jenkins/jenkins:lts
     ports:
-      - "8080:8080"            # Puerto de Jenkins
-      - "50000:50000"          # Puerto de Jenkins para agentes remotos
+      - "8080:8080"
     volumes:
-      - jenkins_data:/var/jenkins_home  # Volumen persistente para los datos de Jenkins
-      - /var/run/docker.sock:/var/run/docker.sock  # Monta el socket de Docker del host
-    environment:
-      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false  # Deshabilitar el asistente de configuración
-      - JENKINS_USER=admin      # Nombre de usuario predeterminado
-      - JENKINS_PASS=admin      # Contraseña predeterminada
+      - jenkins_home:/var/jenkins_home
+    restart: always
     networks:
-      - back-tier              # Red personalizada, puedes cambiarla si es necesario
+      - back-tier
 
   ssh-agent:
-    image: jenkins/ssh-agent  # Imagen oficial para el agente SSH de Jenkins
+    image: jenkins/ssh-agent
     restart: always
     networks:
       - back-tier
 
   prometheus:
-    image: prom/prometheus:latest  # Última versión de Prometheus
+    image: prom/prometheus:latest  # Se usa la última versión disponible de Prometheus
     restart: always
     volumes:
       - ./prometheus/:/etc/prometheus/
@@ -36,17 +27,17 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
     ports:
-      - "9090:9090"             # Puerto para acceder a Prometheus
+      - 9090:9090
     networks:
       - back-tier
 
   grafana:
-    image: grafana/grafana:latest  # Última versión de Grafana
+    image: grafana/grafana:latest  # Se usa la última versión disponible de Grafana
     restart: always
     depends_on:
       - prometheus
     ports:
-      - "3000:3000"             # Puerto para acceder a Grafana
+      - 3000:3000
     volumes:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning/:/etc/grafana/provisioning/
@@ -56,7 +47,7 @@ services:
       - back-tier
 
   node-exporter:
-    image: prom/node-exporter:latest  # Última versión de Node Exporter
+    image: prom/node-exporter:latest  # Se usa la última versión disponible de Node Exporter
     restart: always
     volumes:
       - /proc:/host/proc:ro
@@ -65,18 +56,36 @@ services:
     command:
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.ignored-mount-points'
+      - --collector.filesystem.ignored-mount-points
       - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
     expose:
-      - "9100"  # Puerto para acceder al Node Exporter
+      - 9100
     networks:
       - back-tier
 
 volumes:
   prometheus_data: {}
   grafana_data: {}
-  jenkins_data: {}
+  jenkins_home: {}
 
 networks:
   back-tier:
-    driver: bridge
+
+sonarqube:
+    image: sonarqube:lts-community
+    depends_on:
+      - sonar_db
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonar_db:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    ports:
+      - "9001:9000"
+    volumes:
+      - sonarqube_conf:/opt/sonarqube/conf
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_temp:/opt/sonarqube/
+sonar_db:
+  sonar_db_data:
