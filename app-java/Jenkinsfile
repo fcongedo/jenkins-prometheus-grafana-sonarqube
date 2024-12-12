@@ -50,7 +50,7 @@ pipeline {
 
         stage('Instalar dependencias') {
             steps {
-                dir('jenkins-prometheus-grafana/app-java/pom.xml') {
+                dir('/var/jenkins_home/workspace/prueba/app-java') {
                 sh 'mvn clean install'
             }
           }
