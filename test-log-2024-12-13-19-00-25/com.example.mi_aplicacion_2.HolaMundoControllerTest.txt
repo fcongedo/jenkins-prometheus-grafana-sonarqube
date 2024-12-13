@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.example.mi_aplicacion_2.HolaMundoControllerTest
+-------------------------------------------------------------------------------
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.968 s -- in com.example.mi_aplicacion_2.HolaMundoControllerTest
