@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Aumentar el valor de vm.max_map_count
+sudo sysctl -w vm.max_map_count=262144
+
 # Actualizar los paquetes de apt
 sudo apt-get update -y
 sudo apt-get install -y ca-certificates curl lsb-release
@@ -29,5 +32,17 @@ sudo groupadd docker
 sudo usermod -aG docker vagrant
 newgrp docker
 
-# clonar repositorio github
+# Clonar repositorio github
 git clone https://github.com/fcongedo/prueba
+
+# Navegar al directorio del repositorio clonado
+cd prueba
+
+# Ejecutar el comando de construcción de las imágenes Docker
+sudo docker compose build --pull --no-cache
+
+# Ejecutar los contenedores en modo detached
+sudo docker compose up --detach
+
+# Mostrar los contenedores corriendo
+docker ps
