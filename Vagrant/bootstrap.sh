@@ -33,7 +33,7 @@ sudo usermod -aG docker vagrant
 newgrp docker
 
 # Clonar repositorio github
-git clone https://github.com/fcongedo/prueba
+git clone https://github.com/NicolasBatistelli/jenkins-prometheus-grafana-sonarqube.git
 
 # Navegar al directorio del repositorio clonado
 cd prueba
