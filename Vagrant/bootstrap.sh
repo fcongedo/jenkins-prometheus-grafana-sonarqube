@@ -33,16 +33,15 @@ sudo usermod -aG docker vagrant
 newgrp docker
 
 # Clonar repositorio github
-git clone https://github.com/NicolasBatistelli/jenkins-prometheus-grafana-sonarqube.git
+git clone https://github.com/fcongedo/jenkins-prometheus-grafana-sonarqube.git
 
 # Navegar al directorio del repositorio clonado
 cd jenkins-prometheus-grafana-sonarqube
 
 # Ejecutar el comando de construcción de las imágenes Docker
-sudo docker compose build --pull --no-cache
+sudo docker compose build --pull --no-cache & sudo docker compose up --detach &
+wait
 
-# Ejecutar los contenedores en modo detached
-sudo docker compose up --detach
 
 # Mostrar los contenedores corriendo
 docker ps
