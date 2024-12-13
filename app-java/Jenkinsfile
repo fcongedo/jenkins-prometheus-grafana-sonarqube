@@ -1,13 +1,14 @@
 pipeline {
     agent any
 
-    tools {
+    /*tools {
         maven 'Maven 3.9.9'
-    }
+    }*/
 
     environment {
         PROJECT_NAME = 'mi-aplicacion' // Nombre del proyecto
         DOCKER_PORT = '8081'
+        SONARQUBE_SERVER = 'SonarQube'
     }
 
     stages {
@@ -20,14 +21,14 @@ pipeline {
             }
         }
 
-        stage('Instalar Java 17') {
+        /*stage('Instalar Java 17') {
             steps {
                 sh '''
                     sudo apt-get update
                     sudo apt-get install -y openjdk-17-jdk
                 '''
             }
-        }
+        }*/
 
         stage('Clonar código fuente') {
             steps {
@@ -50,15 +51,31 @@ pipeline {
 
         stage('Instalar dependencias') {
             steps {
-                dir('/var/jenkins_home/workspace/prueba/app-java/') {
+                dir('app-java') {
                 sh 'mvn clean install'
             }
           }
         }
 
+        stage('Análisis de SonarQube') {
+            steps {
+                withSonarQubeEnv(env.SONARQUBE_SERVER) {
+                    dir('app-java') {
+                        sh '''
+                            mvn sonar:sonar \
+                                -Dsonar.projectKey=${PROJECT_NAME} \
+                                -Dsonar.projectVersion=${PROJECT_VERSION} \
+                                -Dsonar.host.url=$SONAR_HOST_URL \
+                                -Dsonar.login=$SONAR_AUTH_TOKEN
+                        '''
+                    }
+                }
+            }
+        }
+
         stage('Ejecutar pruebas unitarias') {
             steps {
-                dir('/var/jenkins_home/workspace/prueba/app-java/') {
+                dir('app-java') {
                 sh 'mvn test'
                 junit '**/target/surefire-reports/*.xml'
             }
@@ -135,7 +152,7 @@ def createEmailBody(commitInfo) {
 
 def uploadTestReports(commitInfo) {
     def date = new Date().format('yyyy-MM-dd-HH-mm-ss')
-    def logDir = "/home/labqa/logs-pipeline-mobile/test-log-${date}"
+    def logDir = "/home/vagrant/logs-pipeline-mobile/test-log-${date}"
     
     // Crear directorio para los logs de pruebas
     sh "sudo mkdir -p ${logDir}"
@@ -143,7 +160,7 @@ def uploadTestReports(commitInfo) {
 
     // Subir los reportes a GitHub
     sh "sudo rm -rf /tmp/test-reports" // Eliminar directorio temporal si existe
-    sh "git clone https://github.com/maita07/tests_resultados /tmp/test-reports"
+    sh "git clone -b reportes-tests https://github.com/fcongedo/jenkins-prometheus-grafana-sonarqube /tmp/test-reports" // Clonar la rama específica
     sh "sudo cp -r ${logDir} /tmp/test-reports/"
 
     // Verificar los archivos que se subieron
@@ -154,16 +171,17 @@ def uploadTestReports(commitInfo) {
         dir('/tmp/test-reports') {
             sh "git config user.name '${commitInfo.authorName}'"
             sh "git config user.email '${commitInfo.authorEmail}'"
-            sh "git remote set-url origin https://${GITHUB_USER}:${GITHUB_PAT}@github.com/maita07/tests_resultados.git"
+            sh "git remote set-url origin https://${GITHUB_USER}:${GITHUB_PAT}@github.com/fcongedo/jenkins-prometheus-grafana-sonarqube.git"
             sh 'git add .'
             sh 'git commit -m "Agregando reportes de prueba"'
-            sh 'git push origin main'
+            sh 'git push origin reportes-tests' // Asegúrate de usar la rama específica
         }
     }
 
-    // Si hay reportes, devolvemos el enlace a los reportes en GitHub
-    return "https://github.com/maita07/tests_resultados/tree/main/test-log-${date}"
+    // Devolver enlace a la rama con los reportes
+    return "https://github.com/fcongedo/jenkins-prometheus-grafana-sonarqube/tree/reportes-tests/test-log-${date}"
 }
+
 
 def sendEmail(body) {
     emailext(
