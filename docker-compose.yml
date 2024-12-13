@@ -88,7 +88,7 @@ services:
     restart: always
 
   sonar_db:
-    image: postgres:latest
+    image: postgres:alpine
     environment:
       POSTGRES_USER: sonar
       POSTGRES_PASSWORD: sonar
