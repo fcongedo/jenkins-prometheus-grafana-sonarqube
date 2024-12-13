@@ -1,0 +1,5 @@
+git
+docker-workflow
+blueocean
+prometheus
+sonar
