@@ -70,7 +70,7 @@ pipeline {
                 script {
                     def dockerTag = "${env.PROJECT_NAME}:${env.PROJECT_VERSION}"
                     echo "Construyendo la imagen Docker con el tag: ${dockerTag}"
-                    sh "docker build --build-arg PROJECT_VERSION=${env.PROJECT_VERSION} -t ${dockerTag} ."
+                    sh "docker build --build-arg PROJECT_VERSION=${env.PROJECT_VERSION} -t ${dockerTag} -f /var/jenkins_home/workspace/prueba/app-java/Dockerfile /var/jenkins_home/workspace/prueba/app-java"
 
                     // Detener y eliminar contenedor si existe
                     sh """
