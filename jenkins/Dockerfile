@@ -27,11 +27,11 @@ ENV PATH=$JAVA_HOME/bin:$PATH
 ENV M2_HOME=/opt/maven
 ENV PATH=$M2_HOME/bin:$PATH
 
-# Copiar el archivo de plugins para Jenkins
+# Copiar el archivo plugins.txt con la lista de plugins
 COPY plugins.txt /usr/share/jenkins/plugins.txt
 
-# Instalar los plugins de Jenkins listados en plugins.txt
-RUN /usr/local/bin/install-plugins.sh < /usr/share/jenkins/plugins.txt
+# Inicializar Jenkins y ejecutar la instalación de plugins automáticamente al inicio
+RUN /bin/bash -c "echo 'JENKINS_PLUGINS='/usr/share/jenkins/plugins.txt' >> /usr/local/bin/jenkins-plugin-cli"
 
 # Volver al usuario Jenkins por defecto
 USER jenkins
