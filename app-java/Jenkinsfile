@@ -156,7 +156,7 @@ def uploadTestReports(commitInfo) {
     
     // Crear directorio para los logs de pruebas
     sh "sudo mkdir -p ${logDir}"
-    sh "sudo cp target/surefire-reports/*.txt ${logDir}"
+    sh "sudo cp /var/jenkins_home/workspace/prueba/app-java/target/surefire-reports/*.txt ${logDir}"
 
     // Subir los reportes a GitHub
     sh "sudo rm -rf /tmp/test-reports" // Eliminar directorio temporal si existe
