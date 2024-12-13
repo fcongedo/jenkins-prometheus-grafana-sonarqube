@@ -67,7 +67,7 @@ services:
     networks:
       - back-tier
 
-    sonarqube:
+  sonarqube:
     image: sonarqube:lts-community
     depends_on:
       - sonar_db
