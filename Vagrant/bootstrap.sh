@@ -36,7 +36,7 @@ newgrp docker
 git clone https://github.com/NicolasBatistelli/jenkins-prometheus-grafana-sonarqube.git
 
 # Navegar al directorio del repositorio clonado
-cd prueba
+cd jenkins-prometheus-grafana-sonarqube
 
 # Ejecutar el comando de construcción de las imágenes Docker
 sudo docker compose build --pull --no-cache
