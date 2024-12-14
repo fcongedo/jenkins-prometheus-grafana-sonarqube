@@ -83,8 +83,6 @@ services:
       - sonarqube_extensions:/opt/sonarqube/extensions
       - sonarqube_logs:/opt/sonarqube/logs
       - sonarqube_temp:/opt/sonarqube/
-      - ./init-sonarqube.sh:/opt/init-sonarqube.sh
-    command: ["/bin/bash", "-c", "/opt/init-sonarqube.sh && bin/run.sh"]
     networks:
       - back-tier
     restart: always
