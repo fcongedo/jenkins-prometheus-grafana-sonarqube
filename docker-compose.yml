@@ -1,8 +1,10 @@
 services:
   jenkins:
+    container_name: jenkins
     build:
       context: ./jenkins/
       dockerfile: Dockerfile  # Utiliza el Dockerfile que creaste para Jenkins
+    image: jenkins-custom:latest  # Nombre personalizado de la imagen
     ports:
       - "8080:8080"
     volumes:
@@ -14,12 +16,14 @@ services:
       - back-tier
 
   ssh-agent:
+    container_name: ssh-agent
     image: jenkins/ssh-agent
     restart: always
     networks:
       - back-tier
 
   prometheus:
+    container_name: prometheus
     image: prom/prometheus:latest
     restart: always
     volumes:
@@ -36,6 +40,7 @@ services:
       - back-tier
 
   grafana:
+    container_name: grafana
     image: grafana/grafana:latest
     restart: always
     depends_on:
@@ -51,6 +56,7 @@ services:
       - back-tier
 
   node-exporter:
+    container_name: node-exporter
     image: prom/node-exporter:latest
     restart: always
     volumes:
@@ -68,6 +74,7 @@ services:
       - back-tier
 
   sonarqube:
+    container_name: sonarqube
     image: sonarqube:lts-community
     depends_on:
       - sonar_db
@@ -88,6 +95,7 @@ services:
     restart: always
 
   sonar_db:
+    container_name: sonar-db
     image: postgres:alpine
     environment:
       POSTGRES_USER: sonar
