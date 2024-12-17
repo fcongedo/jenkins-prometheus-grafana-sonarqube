@@ -63,7 +63,7 @@ pipeline {
                     
                     // Eliminar imágenes antiguas (opcional, si necesitas borrar imágenes)
                     echo "Eliminando imágenes antiguas..."
-                    sh "docker rmi $(docker images -q) || true"  // Elimina todas las imágenes, excepto las que están en uso
+                    sh "docker rmi \$(docker images -q) || true"  // Elimina todas las imágenes, excepto las que están en uso
                     
                     // Construir nuevas imágenes con Docker Compose
                     echo "Construyendo las imágenes con Docker Compose..."
