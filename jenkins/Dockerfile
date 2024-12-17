@@ -36,8 +36,12 @@ RUN jenkins-plugin-cli --plugins -f /usr/share/jenkins/ref/plugins.txt
 # Deshabilitar el Setup Wizard
 ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false"
 
-# Copiar el script Groovy para inicializar Jenkins con credenciales predeterminadas
-COPY basic-security.groovy /usr/share/jenkins/ref/init.groovy.d/basic-security.groovy
+# Copiar el archivo jenkins.yaml para la configuración de Jenkins
+COPY jenkins.yaml /var/jenkins_home/jenkins.yaml
+
+# Asegurar que Jenkins cargue la configuración en el arranque
+
+ENV JENKINS_CASC_JENKINS_CONFIG=/var/jenkins_home/jenkins.yaml
 
 # Volver al usuario Jenkins por defecto
 USER jenkins
