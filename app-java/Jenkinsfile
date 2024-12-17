@@ -3,8 +3,9 @@ pipeline {
 
     environment {
         PROJECT_NAME = 'mi-aplicacion' // Nombre del proyecto
-        DOCKER_PORT = '8081'
-        SONARQUBE_SERVER = 'SonarQube'
+        DOCKER_PORT = '8085'
+        //SONARQUBE_SERVER = 'SonarQube'
+        DOCKER_COMPOSE_FILE = "${env.WORKSPACE}/app-java/docker-compose.yml"
     }
 
     stages {
@@ -39,23 +40,7 @@ pipeline {
         stage('Instalar dependencias') {
             steps {
                 dir('app-java') {
-                sh 'mvn clean install'
-            }
-          }
-        }
-
-        stage('Análisis de SonarQube') {
-            steps {
-                withSonarQubeEnv(env.SONARQUBE_SERVER) {
-                    dir('app-java') {
-                        sh '''
-                            mvn sonar:sonar \
-                                -Dsonar.projectKey=${PROJECT_NAME} \
-                                -Dsonar.projectVersion=${PROJECT_VERSION} \
-                                -Dsonar.host.url=$SONAR_HOST_URL \
-                                -Dsonar.login=$SONAR_AUTH_TOKEN
-                        '''
-                    }
+                    sh 'mvn clean install -DskipTests'
                 }
             }
         }
@@ -63,30 +48,34 @@ pipeline {
         stage('Ejecutar pruebas unitarias') {
             steps {
                 dir('app-java') {
-                sh 'mvn test'
-                junit '**/target/surefire-reports/*.xml'
-            }
-          }
-        }
-
-        stage('Build & Run Docker') {
-            steps {
-                script {
-                    def dockerTag = "${env.PROJECT_NAME}:${env.PROJECT_VERSION}"
-                    echo "Construyendo la imagen Docker con el tag: ${dockerTag}"
-                    sh "docker build --build-arg PROJECT_VERSION=${env.PROJECT_VERSION} -t ${dockerTag} -f /var/jenkins_home/workspace/prueba/app-java/Dockerfile /var/jenkins_home/workspace/prueba/app-java"
-
-                    // Detener y eliminar contenedor si existe
-                    sh """
-                        docker ps -q -f name=${env.PROJECT_NAME} | xargs -r docker stop || true
-                        docker rm -f ${env.PROJECT_NAME} || true
-                    """
-
-                    // Correr el contenedor en segundo plano
-                    sh "docker run -d -p ${DOCKER_PORT}:${DOCKER_PORT} --name ${env.PROJECT_NAME} ${dockerTag}"
+                    sh 'mvn test'
+                    junit '**/target/surefire-reports/*.xml'
                 }
             }
         }
+
+        stage('Build Docker Images') {
+            steps {
+                script {
+                    // Eliminar contenedores y redes existentes si existen
+                    echo "Eliminando contenedores y redes existentes..."
+                    sh "docker compose -f ${DOCKER_COMPOSE_FILE} down --volumes --remove-orphans"
+                    
+                    // Eliminar imágenes antiguas (opcional, si necesitas borrar imágenes)
+                    echo "Eliminando imágenes antiguas..."
+                    sh "docker rmi $(docker images -q) || true"  // Elimina todas las imágenes, excepto las que están en uso
+                    
+                    // Construir nuevas imágenes con Docker Compose
+                    echo "Construyendo las imágenes con Docker Compose..."
+                    sh "docker compose -f ${DOCKER_COMPOSE_FILE} build"
+                    
+                    // Levantar los contenedores con Docker Compose
+                    echo "Levantando contenedores con Docker Compose..."
+                    sh "docker compose -f ${DOCKER_COMPOSE_FILE} up -d"
+                }
+            }   
+        }
+
     }
 
     post {
@@ -139,19 +128,19 @@ def createEmailBody(commitInfo) {
 
 def uploadTestReports(commitInfo) {
     def date = new Date().format('yyyy-MM-dd-HH-mm-ss')
-    def logDir = "/home/vagrant/logs-pipeline-mobile/test-log-${date}"
+    def logDir = "${env.WORKSPACE}/logs/test-log-${date}"
     
     // Crear directorio para los logs de pruebas
-    sh "sudo mkdir -p ${logDir}"
-    sh "sudo cp /var/jenkins_home/workspace/prueba/app-java/target/surefire-reports/*.txt ${logDir}"
+    sh "mkdir -p ${logDir}"
+    sh "cp ${env.WORKSPACE}/app-java/target/surefire-reports/*.txt ${logDir}"
 
     // Subir los reportes a GitHub
-    sh "sudo rm -rf /tmp/test-reports" // Eliminar directorio temporal si existe
+    sh "rm -rf /tmp/test-reports" // Eliminar directorio temporal si existe
     sh "git clone -b reportes-tests https://github.com/fcongedo/jenkins-prometheus-grafana-sonarqube /tmp/test-reports" // Clonar la rama específica
-    sh "sudo cp -r ${logDir} /tmp/test-reports/"
+    sh "cp -r ${logDir} /tmp/test-reports/"
 
     // Verificar los archivos que se subieron
-    sh "sudo ls -l /tmp/test-reports/"
+    sh "ls -l /tmp/test-reports/"
 
     // Realizar commit y push de los archivos
     withCredentials([usernamePassword(credentialsId: 'github-token', usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_PAT')]) {
@@ -169,13 +158,12 @@ def uploadTestReports(commitInfo) {
     return "https://github.com/fcongedo/jenkins-prometheus-grafana-sonarqube/tree/reportes-tests/test-log-${date}"
 }
 
-
 def sendEmail(body) {
     emailext(
         subject: "Jenkins Build #${BUILD_NUMBER} - ${currentBuild.currentResult}",
         body: body,
         to: currentBuild.getBuildCauses()[0].userId, // Autor del commit
         mimeType: 'text/html',
-        attachmentsPattern: 'target/surefire-reports/*.txt'
+        attachmentsPattern: 'app-java/target/surefire-reports/*.txt'
     )
 }

@@ -109,6 +109,7 @@ cd jenkins-prometheus-grafana-sonarqube
 
 # Construir las imágenes Docker
 echo_message "⚙️  Construyendo imágenes Docker..."
+run_command docker network create back-tier || true
 run_command sudo docker compose build --pull --no-cache
 progress_bar
 

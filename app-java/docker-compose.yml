@@ -1,0 +1,19 @@
+services:
+  # Servicio de la aplicación Java
+  app-java:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/testdb
+      SPRING_DATASOURCE_USERNAME: testuser
+      SPRING_DATASOURCE_PASSWORD: testpassword
+    networks:
+      - back-tier
+    restart: always
+
+networks:
+  back-tier:
+    external: true

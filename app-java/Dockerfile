@@ -23,10 +23,10 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Copiar el archivo .jar generado en la etapa de construcción al contenedor
-COPY --from=builder /app/target/mi-aplicacion-2-0.0.1-SNAPSHOT.jar /app/mi-aplicacion.jar
+COPY --from=builder /app/target/api-java-0.0.1-SNAPSHOT.jar /app/mi-aplicacion.jar
 
 # Exponer el puerto en el que la aplicación Spring Boot estará corriendo
-EXPOSE 8081
+EXPOSE 8085
 
 # Comando para ejecutar la aplicación
 ENTRYPOINT ["java", "-jar", "mi-aplicacion.jar"]

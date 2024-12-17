@@ -107,6 +107,22 @@ services:
       - back-tier
     restart: always
 
+  mysql-db:
+    container_name: mysql-db
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: testdb
+      MYSQL_USER: testuser
+      MYSQL_PASSWORD: testpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - back-tier
+
 volumes:
   prometheus_data: {}
   grafana_data: {}
@@ -120,4 +136,4 @@ volumes:
 
 networks:
   back-tier:
-    driver: bridge
+    external: true
