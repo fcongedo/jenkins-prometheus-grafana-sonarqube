@@ -5,8 +5,14 @@ USER root
 
 # Instalar sudo, Docker, Java 17 y Maven 3.9.9
 RUN apt-get update && \
-    apt-get install -y sudo docker.io openjdk-17-jdk wget && \
+    apt-get install -y sudo docker.io openjdk-17-jdk wget curl && \
     apt-get clean
+
+# Instalar Docker Compose v2 como binario
+RUN curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
+    chmod +x /usr/local/bin/docker-compose && \
+    mkdir -p /usr/lib/docker/cli-plugins && \
+    mv /usr/local/bin/docker-compose /usr/lib/docker/cli-plugins/docker-compose
 
 # Instalar Maven 3.9.9
 RUN wget https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz && \
@@ -40,7 +46,6 @@ ENV JAVA_OPTS="-Djenkins.install.runSetupWizard=false"
 COPY jenkins.yaml /var/jenkins_home/jenkins.yaml
 
 # Asegurar que Jenkins cargue la configuración en el arranque
-
 ENV JENKINS_CASC_JENKINS_CONFIG=/var/jenkins_home/jenkins.yaml
 
 # Volver al usuario Jenkins por defecto
