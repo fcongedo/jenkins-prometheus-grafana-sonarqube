@@ -133,6 +133,7 @@ volumes:
   sonarqube_logs: {}
   sonarqube_temp: {}
   sonar_db_data: {}
+  mysql_data: {}
 
 networks:
   back-tier:
