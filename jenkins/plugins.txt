@@ -4,3 +4,4 @@ dark-theme
 configuration-as-code
 prometheus
 sonar
+email-ext
