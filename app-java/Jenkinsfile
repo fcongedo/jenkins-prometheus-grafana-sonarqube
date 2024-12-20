@@ -162,7 +162,7 @@ def sendEmail(body) {
     emailext(
         subject: "Jenkins Build #${BUILD_NUMBER} - ${currentBuild.currentResult}",
         body: body,
-        to: currentBuild.getBuildCauses()[0].userId, // Autor del commit
+        to: 'nicolasbati8@gmail.com', // Autor del commit
         mimeType: 'text/html',
         attachmentsPattern: 'app-java/target/surefire-reports/*.txt'
     )
