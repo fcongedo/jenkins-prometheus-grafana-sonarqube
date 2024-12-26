@@ -123,7 +123,7 @@ sleep 10
 
 # Mostrar las URLs HTTP de los contenedores relevantes
 echo_message "${CYAN}🌐 Servicios en Contenedores Docker:${NC}"
-docker ps --format "table {{.Names}}\t{{.Ports}}" | grep -E "(8080|9090|3000|9001)" | while read line
+docker ps --format "table {{.Names}}\t{{.Ports}}" | grep -E "(8080|9090|3000|9000)" | while read line
 do
     CONTAINER_NAME=$(echo $line | awk '{print $1}')
     CONTAINER_PORT=$(echo $line | awk '{print $2}' | cut -d':' -f2)
