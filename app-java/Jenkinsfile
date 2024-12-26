@@ -5,6 +5,7 @@ pipeline {
         PROJECT_NAME = 'mi-aplicacion' // Nombre del proyecto
         DOCKER_PORT = '8085'
         DOCKER_COMPOSE_FILE = "${env.WORKSPACE}/app-java/docker-compose.yml"
+        SONARQUBE_URL = 'http://172.18.0.8:9000'
     }
 
     stages {
@@ -57,7 +58,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube_server') {
                     dir('app-java') {
-                        sh 'mvn sonar:sonar -Dsonar.projectKey=mi-aplicacion -Dsonar.host.url=curl http://172.18.0.8:9000 -Dsonar.login=$SONAR_AUTH_TOKEN'
+                        sh 'mvn sonar:sonar -Dsonar.projectKey=mi-aplicacion -Dsonar.host.url=${SONARQUBE_URL} -Dsonar.login=$SONAR_AUTH_TOKEN'
                     }
                 }
             }
