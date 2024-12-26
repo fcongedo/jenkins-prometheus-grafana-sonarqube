@@ -4,7 +4,6 @@ pipeline {
     environment {
         PROJECT_NAME = 'mi-aplicacion' // Nombre del proyecto
         DOCKER_PORT = '8085'
-        //SONARQUBE_SERVER = 'SonarQube'
         DOCKER_COMPOSE_FILE = "${env.WORKSPACE}/app-java/docker-compose.yml"
     }
 
@@ -50,6 +49,16 @@ pipeline {
                 dir('app-java') {
                     sh 'mvn test'
                     junit '**/target/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        stage('Análisis con SonarQube') {
+            steps {
+                withSonarQubeEnv('SonarQube_server') {
+                    dir('app-java') {
+                        sh 'mvn sonar:sonar -Dsonar.projectKey=mi-aplicacion -Dsonar.host.url=http://localhost:9001 -Dsonar.login=$SONAR_AUTH_TOKEN'
+                    }
                 }
             }
         }
