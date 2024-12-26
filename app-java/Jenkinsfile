@@ -57,7 +57,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube_server') {
                     dir('app-java') {
-                        sh 'mvn sonar:sonar -Dsonar.projectKey=mi-aplicacion -Dsonar.host.url=http://localhost:9000 -Dsonar.login=$SONAR_AUTH_TOKEN'
+                        sh 'mvn sonar:sonar -Dsonar.projectKey=mi-aplicacion -Dsonar.host.url=curl http://172.18.0.8:9000 -Dsonar.login=$SONAR_AUTH_TOKEN'
                     }
                 }
             }
