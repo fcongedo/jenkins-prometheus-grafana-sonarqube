@@ -2,8 +2,7 @@
 
 SONAR_URL="http://localhost:9000"
 OLD_PASSWORD="admin"
-NEW_PASSWORD="administrator"
-#TOKEN_NAME="jenkins-token"
+NEW_PASSWORD="Administrator@1"
 USERNAME="admin"
 
 echo "Esperando a que SonarQube esté disponible en $SONAR_URL ..."

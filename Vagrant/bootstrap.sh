@@ -121,11 +121,28 @@ progress_bar
 # Esperar a que los contenedores estén en marcha
 sleep 10
 
-# Mostrar las URLs HTTP de los contenedores relevantes
+
+# Mostrar las URLs HTTP de los contenedores relevantes con credenciales
 echo_message "${CYAN}🌐 Servicios en Contenedores Docker:${NC}"
-docker ps --format "table {{.Names}}\t{{.Ports}}" | grep -E "(8080|9090|3000|9000)" | while read line
+
+# Definir credenciales comunes
+declare -A CONTAINERS_CREDS
+CONTAINERS_CREDS["jenkins"]="admin:admin"
+CONTAINERS_CREDS["sonarqube"]="admin:Administrator@1"
+CONTAINERS_CREDS["grafana"]="admin:admin"
+
+# Leer los contenedores y mostrar las URLs
+docker ps --format "table {{.Names}}\t{{.Ports}}" | grep -E "(8080|3000|9000|9090)" | while read line
 do
     CONTAINER_NAME=$(echo $line | awk '{print $1}')
-    CONTAINER_PORT=$(echo $line | awk '{print $2}' | cut -d':' -f2)
-    echo -e "${YELLOW}$CONTAINER_NAME${NC}    http://localhost:$CONTAINER_PORT/ 🚀"
+    CONTAINER_PORT=$(echo $line | awk '{print $2}' | cut -d':' -f2 | cut -d'-' -f1)  # Ajustado para corregir el formato de puerto
+
+    if [[ -n "${CONTAINERS_CREDS[$CONTAINER_NAME]}" ]]; then
+        USER_PASSWORD=${CONTAINERS_CREDS[$CONTAINER_NAME]}
+        USER=$(echo $USER_PASSWORD | cut -d':' -f1)
+        PASSWORD=$(echo $USER_PASSWORD | cut -d':' -f2)
+        echo -e "${YELLOW}Contenedor:${NC} ${GREEN}$CONTAINER_NAME${NC}    ${CYAN}URL:${NC} http://localhost:$CONTAINER_PORT/ 🚀  ${YELLOW}Usuario:${NC} $USER  ${YELLOW}Contraseña:${NC} $PASSWORD"
+    else
+        echo -e "${YELLOW}Contenedor:${NC} ${GREEN}$CONTAINER_NAME${NC}    ${CYAN}URL:${NC} http://localhost:$CONTAINER_PORT/"
+    fi
 done
