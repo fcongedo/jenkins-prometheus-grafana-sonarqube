@@ -5,7 +5,7 @@ pipeline {
         PROJECT_NAME = 'mi-aplicacion' // Nombre del proyecto
         DOCKER_PORT = '8085'
         DOCKER_COMPOSE_FILE = "${env.WORKSPACE}/app-java/docker-compose.yml"
-        SONARQUBE_URL = 'http://172.18.0.8:9000'
+        SONARQUBE_URL = "${env.SONARQUBE_URL}"
     }
 
     stages {

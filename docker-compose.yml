@@ -16,6 +16,8 @@ services:
       - back-tier
     depends_on:
       - sonarqube
+    environment:
+      SONARQUBE_URL: http://sonarqube:9000
 
   ssh-agent:
     container_name: ssh-agent
@@ -98,7 +100,6 @@ services:
     networks:
       - back-tier
     restart: always
-
 
   sonar_db:
     container_name: sonar-db
