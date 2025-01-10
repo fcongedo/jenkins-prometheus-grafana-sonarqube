@@ -56,7 +56,7 @@ pipeline {
 
         stage('Análisis con SonarQube') {
             steps {
-                withSonarQubeEnv('SonarQube_server') {
+                withSonarQubeEnv('sonarqube_server') {
                     dir('app-java') {
                         sh 'mvn sonar:sonar -Dsonar.projectKey=mi-aplicacion -Dsonar.host.url=${SONARQUBE_URL} -Dsonar.login=$SONAR_AUTH_TOKEN'
                     }
@@ -109,7 +109,7 @@ pipeline {
                 }
 
                 // Enviar correo
-                sendEmail(body)
+                sendEmail(commitInfo.authorEmail, body)
             }
         }
     }
@@ -168,11 +168,11 @@ def uploadTestReports(commitInfo) {
     return "https://github.com/fcongedo/jenkins-prometheus-grafana-sonarqube/tree/reportes-tests/test-log-${date}"
 }
 
-def sendEmail(body) {
+def sendEmail(String recipientEmail, String body) {
     emailext(
         subject: "Jenkins Build #${BUILD_NUMBER} - ${currentBuild.currentResult}",
         body: body,
-        to: currentBuild.getBuildCauses()[0].userId, // Autor del commit
+        to: recipientEmail, // Usar mail del auto del commit
         mimeType: 'text/html',
         attachmentsPattern: 'app-java/target/surefire-reports/*.txt'
     )
