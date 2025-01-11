@@ -1,0 +1,60 @@
+---
+- name: Playbook para instalar Docker CE y Docker Compose Plugin v2 en Ubuntu 22.04 y levantar los contenedores con Docker Compose
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Actualizar el índice de paquetes
+      apt:
+        update_cache: yes
+
+    - name: Instalar dependencias necesarias
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+
+    - name: Agregar la clave GPG oficial de Docker
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Agregar el repositorio de Docker
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+
+    - name: Actualizar el índice de paquetes después de agregar el repositorio Docker
+      apt:
+        update_cache: yes
+
+    - name: Instalar Docker CE
+      apt:
+        name: docker-ce
+        state: present
+
+    - name: Instalar Docker Compose Plugin v2
+      apt:
+        name: docker-compose-plugin
+        state: present
+
+    - name: Ajustar vm.max_map_count
+      command: sysctl -w vm.max_map_count=262144
+
+    - name: Crear la red Docker back-tier si no existe
+      docker_network:
+        name: back-tier
+        state: present
+
+    - name: Construir las imágenes de Docker con Docker Compose
+      command: docker compose build --pull --no-cache
+      args:
+        chdir: /home/vagrant/jenkins-prometheus-grafana-sonarqube
+
+    - name: Levantar los contenedores con Docker Compose
+      command: docker compose up --detach
+      args:
+        chdir: /home/vagrant/jenkins-prometheus-grafana-sonarqube
